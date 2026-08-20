@@ -1,8 +1,10 @@
 <div align="center">
 
-# 第十九届计算机设计大赛（人工智能实践赛） · 智瞰危局
-
+# 第十九届计算机设计大赛（人工智能实践赛）·智瞰危局
 灾害与突发事件场景下的谣言识别、求助信息融合与资源调度系统。
+
+> Disaster emergency rumor identification, help‑information fusion and resource scheduling system
+
 
 </div>
 
