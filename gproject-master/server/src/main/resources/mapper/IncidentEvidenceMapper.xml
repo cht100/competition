@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hrd.mapper.IncidentEvidenceMapper">
+
+    <!-- 事件证据链结果映射 -->
+    <resultMap id="IncidentEvidenceResultMap" type="com.hrd.entity.IncidentEvidence">
+        <id column="id" property="id"/>
+        <result column="incident_id" property="incidentId"/>
+        <result column="message_id" property="messageId"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="is_primary" property="isPrimary"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, incident_id, message_id, sort_order, is_primary, create_time
+    </sql>
+
+    <!-- 根据ID查询证据链 -->
+    <select id="selectById" parameterType="java.lang.Long" resultMap="IncidentEvidenceResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM incident_evidences
+        WHERE id = #{id}
+    </select>
+
+    <!-- 查询所有证据链 -->
+    <select id="selectAll" resultMap="IncidentEvidenceResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM incident_evidences
+        ORDER BY incident_id, sort_order
+    </select>
+
+    <!-- 根据事件ID查询证据链 -->
+    <select id="selectByIncidentId" parameterType="java.lang.Long" resultMap="IncidentEvidenceResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM incident_evidences
+        WHERE incident_id = #{incidentId}
+        ORDER BY sort_order
+    </select>
+
+    <!-- 根据消息ID查询证据链 -->
+    <select id="selectByMessageId" parameterType="java.lang.Long" resultMap="IncidentEvidenceResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM incident_evidences
+        WHERE message_id = #{messageId}
+    </select>
+
+    <!-- 查询事件的主要证据 -->
+    <select id="selectPrimaryEvidence" parameterType="java.lang.Long" resultMap="IncidentEvidenceResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM incident_evidences
+        WHERE incident_id = #{incidentId} AND is_primary = 1
+        LIMIT 1
+    </select>
+
+    <!-- 插入证据链 -->
+    <insert id="insert" parameterType="com.hrd.entity.IncidentEvidence" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO incident_evidences (
+            incident_id, message_id, sort_order, is_primary, create_time
+        ) VALUES (
+                     #{incidentId}, #{messageId}, #{sortOrder}, #{isPrimary}, #{createTime}
+                 )
+    </insert>
+
+    <!-- 批量插入证据链 -->
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO incident_evidences (
+        incident_id, message_id, sort_order, is_primary, create_time
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.incidentId}, #{item.messageId}, #{item.sortOrder}, #{item.isPrimary}, #{item.createTime})
+        </foreach>
+    </insert>
+
+    <!-- 更新证据链 -->
+    <update id="updateById" parameterType="com.hrd.entity.IncidentEvidence">
+        UPDATE incident_evidences
+        <set>
+            <if test="incidentId != null">incident_id = #{incidentId},</if>
+            <if test="messageId != null">message_id = #{messageId},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="isPrimary != null">is_primary = #{isPrimary},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除证据链 -->
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM incident_evidences WHERE id = #{id}
+    </delete>
+
+    <!-- 根据事件ID删除证据链 -->
+    <delete id="deleteByIncidentId" parameterType="java.lang.Long">
+        DELETE FROM incident_evidences WHERE incident_id = #{incidentId}
+    </delete>
+
+    <!-- 根据消息ID删除证据链 -->
+    <delete id="deleteByMessageId" parameterType="java.lang.Long">
+        DELETE FROM incident_evidences WHERE message_id = #{messageId}
+    </delete>
+
+    <!-- 批量删除证据链 -->
+    <delete id="deleteBatch" parameterType="java.util.List">
+        DELETE FROM incident_evidences WHERE id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 设置主要证据 -->
+    <update id="setPrimaryEvidence">
+        UPDATE incident_evidences
+        SET is_primary = 1
+        WHERE id = #{id}
+    </update>
+
+    <!-- 取消主要证据 -->
+    <update id="unsetPrimaryEvidence" parameterType="java.lang.Long">
+        UPDATE incident_evidences
+        SET is_primary = 0
+        WHERE incident_id = #{incidentId}
+    </update>
+
+    <!-- 统计证据链总数 -->
+    <select id="countAll" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM incident_evidences
+    </select>
+
+    <!-- 统计事件的证据数量 -->
+    <select id="countByIncidentId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM incident_evidences WHERE incident_id = #{incidentId}
+    </select>
+
+    <!-- 更新证据顺序 -->
+    <update id="updateSortOrder">
+        UPDATE incident_evidences
+        SET sort_order = #{sortOrder}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 条件查询证据链 -->
+    <select id="selectByCondition" resultMap="IncidentEvidenceResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM incident_evidences
+        <where>
+            <if test="incidentId != null">AND incident_id = #{incidentId}</if>
+            <if test="messageId != null">AND message_id = #{messageId}</if>
+            <if test="isPrimary != null">AND is_primary = #{isPrimary}</if>
+        </where>
+        ORDER BY incident_id, sort_order
+    </select>
+
+</mapper>

@@ -1,0 +1,67 @@
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: dev
+  main:
+    allow-circular-references: true
+  datasource:
+    druid:
+      driver-class-name: ${hrd.datasource.driver-class-name}
+      url: jdbc:mysql://${hrd.datasource.host}:${hrd.datasource.port}/${hrd.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&connectTimeout=30000&socketTimeout=30000
+      username: ${hrd.datasource.username}
+      password: ${hrd.datasource.password}
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      keep-alive: true
+      phy-max-use-count: 1000
+      # 连接有效性检测配置
+      validation-query-timeout: 3
+      remove-abandoned: true
+      remove-abandoned-timeout: 180
+      log-abandoned: true
+      # 连接超时配置
+      connect-timeout: 30000
+      socket-timeout: 30000
+
+mybatis:
+  #mapper配置文件
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.hrd.entity
+  configuration:
+    #开启驼峰命名
+    map-underscore-to-camel-case: true
+
+hrd:
+  jwt:
+    # 设置jwt签名加密时使用的秘钥
+    admin-secret-key: hrd
+    # 设置jwt过期时间
+    admin-ttl: 7200000
+    # 设置前端传递过来的令牌名称
+    admin-token-name: token
+    # 执勤人员端JWT配置
+    responder-secret-key: responder
+    responder-ttl: 7200000
+    responder-token-name: responder-token
+
+# AI模型服务配置
+model:
+  service:
+    # Python模型服务地址
+    url: http://127.0.0.1:5001
+
+# 聚类服务配置
+clustering:
+  similarity:
+    # 相似度阈值，超过此阈值则合并到现有事件
+    threshold: 0.75

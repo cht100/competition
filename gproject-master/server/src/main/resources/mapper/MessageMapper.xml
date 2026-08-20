@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hrd.mapper.MessageMapper">
+    <update id="updateById" parameterType="com.hrd.entity.Message">
+        update messages
+        <set>
+            <if test="originalText != null">original_text = #{originalText},</if>
+            <if test="cleanedText != null">cleaned_text = #{cleanedText},</if>
+            <if test="images != null">images = #{images},</if>
+            <if test="publisherName != null">publisher_name = #{publisherName},</if>
+            <if test="publisherId != null">publisher_id = #{publisherId},</if>
+            <if test="publishTime != null">publish_time = #{publishTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="locationText != null">location_text = #{locationText},</if>
+            <if test="lat != null">lat = #{lat},</if>
+            <if test="lng != null">lng = #{lng},</if>
+            <if test="sourcePlatform != null">source_platform = #{sourcePlatform},</if>
+            <if test="url != null">url = #{url},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="aiAnalysis != null">ai_analysis = #{aiAnalysis},</if>
+            <if test="incidentId != null">incident_id = #{incidentId},</if>
+        </set>
+        where id = #{id}
+    </update>
+</mapper>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hrd.mapper.ReviewLogMapper">
+
+    <!-- 审核记录结果映射 -->
+    <resultMap id="ReviewLogResultMap" type="com.hrd.entity.ReviewLog">
+        <id column="id" property="id"/>
+        <result column="incident_id" property="incidentId"/>
+        <result column="operation" property="operation"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="operator_name" property="operatorName"/>
+        <result column="remark" property="remark"/>
+        <result column="before_data" property="beforeData"/>
+        <result column="after_data" property="afterData"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, incident_id, operation, operator_id, operator_name, remark,
+        before_data, after_data, create_time
+    </sql>
+
+    <!-- 根据ID查询审核记录 -->
+    <select id="selectById" parameterType="java.lang.Long" resultMap="ReviewLogResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM review_logs
+        WHERE id = #{id}
+    </select>
+
+    <!-- 查询所有审核记录 -->
+    <select id="selectAll" resultMap="ReviewLogResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM review_logs
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据事件ID查询审核记录 -->
+    <select id="selectByIncidentId" parameterType="java.lang.Long" resultMap="ReviewLogResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM review_logs
+        WHERE incident_id = #{incidentId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据操作人ID查询审核记录 -->
+    <select id="selectByOperatorId" parameterType="java.lang.Long" resultMap="ReviewLogResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM review_logs
+        WHERE operator_id = #{operatorId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据操作类型查询审核记录 -->
+    <select id="selectByOperation" parameterType="java.lang.String" resultMap="ReviewLogResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM review_logs
+        WHERE operation = #{operation}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 插入审核记录 -->
+    <insert id="insert" parameterType="com.hrd.entity.ReviewLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO review_logs (
+            incident_id, operation, operator_id, operator_name, remark,
+            before_data, after_data, create_time
+        ) VALUES (
+                     #{incidentId}, #{operation}, #{operatorId}, #{operatorName}, #{remark},
+                     #{beforeData}, #{afterData}, #{createTime}
+                 )
+    </insert>
+
+    <!-- 删除审核记录 -->
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM review_logs WHERE id = #{id}
+    </delete>
+
+    <!-- 根据事件ID删除审核记录 -->
+    <delete id="deleteByIncidentId" parameterType="java.lang.Long">
+        DELETE FROM review_logs WHERE incident_id = #{incidentId}
+    </delete>
+
+    <!-- 批量删除审核记录 -->
+    <delete id="deleteBatch" parameterType="java.util.List">
+        DELETE FROM review_logs WHERE id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 统计审核记录总数 -->
+    <select id="countAll" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM review_logs
+    </select>
+
+    <!-- 按操作类型统计记录数量 -->
+    <select id="countByOperation" resultType="java.util.Map">
+        SELECT operation, COUNT(*) as count
+        FROM review_logs
+        GROUP BY operation
+    </select>
+
+    <!-- 按日期统计审核记录数量 -->
+    <select id="countByDate" resultType="java.util.Map">
+        SELECT DATE(create_time) as date, COUNT(*) as count
+        FROM review_logs
+        WHERE create_time >= #{startDate} AND create_time &lt;= #{endDate}
+        GROUP BY DATE(create_time)
+        ORDER BY date
+    </select>
+
+    <!-- 条件查询审核记录 -->
+    <select id="selectByCondition" resultMap="ReviewLogResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM review_logs
+        <where>
+            <if test="incidentId != null">AND incident_id = #{incidentId}</if>
+            <if test="operatorId != null">AND operator_id = #{operatorId}</if>
+            <if test="operation != null and operation != ''">AND operation = #{operation}</if>
+            <if test="startTime != null">AND create_time >= #{startTime}</if>
+            <if test="endTime != null">AND create_time &lt;= #{endTime}</if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

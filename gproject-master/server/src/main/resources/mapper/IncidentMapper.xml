@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hrd.mapper.IncidentMapper">
+
+    <!-- 事件结果映射 -->
+    <resultMap id="IncidentResultMap" type="com.hrd.entity.Incident">
+        <id column="id" property="id"/>
+        <result column="summary" property="summary"/>
+        <result column="disaster_type" property="disasterType"/>
+        <result column="info_type" property="infoType"/>
+        <result column="severity" property="severity"/>
+        <result column="confidence" property="confidence"/>
+        <result column="location_text" property="locationText"/>
+        <result column="lat" property="lat"/>
+        <result column="lng" property="lng"/>
+        <result column="status" property="status"/>
+        <result column="ai_suggestion" property="aiSuggestion"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="confirm_time" property="confirmTime"/>
+        <result column="complete_time" property="completeTime"/>
+        <result column="responder_id" property="responderId"/>
+        <result column="feedback" property="feedback"/>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, summary, disaster_type, info_type, severity, confidence,
+        location_text, lat, lng, status, ai_suggestion,
+        create_time, update_time, confirm_time, complete_time,
+        responder_id, feedback
+    </sql>
+
+    <!-- 条件查询事件 -->
+    <select id="selectByCondition" resultMap="IncidentResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM incidents
+        <where>
+            <if test="status != null">AND status = #{status}</if>
+            <if test="disasterType != null and disasterType != ''">AND disaster_type = #{disasterType}</if>
+            <if test="severity != null">AND severity = #{severity}</if>
+            <if test="keyword != null and keyword != ''">
+                AND (summary LIKE CONCAT('%', #{keyword}, '%') OR location_text LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="startTime != null">AND create_time >= #{startTime}</if>
+            <if test="endTime != null">AND create_time &lt;= #{endTime}</if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 查询最近事件 -->
+    <select id="selectRecent" parameterType="java.lang.Integer" resultMap="IncidentResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM incidents
+        ORDER BY create_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 统计事件总数 -->
+    <select id="countAll" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM incidents
+    </select>
+
+    <!-- 按日期统计事件数量 -->
+    <select id="countByDate" resultType="java.util.HashMap">
+        SELECT DATE(create_time) as date, COUNT(*) as count
+        FROM incidents
+        WHERE create_time >= #{startDate} AND create_time &lt;= #{endDate}
+        GROUP BY DATE(create_time)
+        ORDER BY date
+    </select>
+
+</mapper>

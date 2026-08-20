@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Build outputs
+dist/
+build/
+target/
+*.jar
+*.class
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp files
+*.tmp
+*.temp
+*.swp
+*~
+
+# Package files
+*.zip
+*.tar.gz
+*.rar
+
+# Large binaries / submission materials (not part of source repo)
+*.doc
+*.docx
+*.pdf
+*.mp4
+*.bin
+*.safetensors
+*.jar
+
+# Local deployment bundle and model weights
+zhikan_deploy/
+参赛材料/
+model_service/models/
+model_service/.cache/

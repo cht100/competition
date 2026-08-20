@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hrd.mapper.ResponderMapper">
+
+    <!-- 执勤人员结果映射 -->
+    <resultMap id="ResponderResultMap" type="com.hrd.entity.Responder">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="phone" property="phone"/>
+        <result column="position" property="position"/>
+        <result column="status" property="status"/>
+        <result column="lat" property="lat"/>
+        <result column="lng" property="lng"/>
+        <result column="user_id" property="userId"/>
+        <result column="current_incident_id" property="currentIncidentId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, name, phone, position, status, lat, lng, user_id, current_incident_id, create_time, update_time
+    </sql>
+
+    <!-- selectById 由 MyBatis-Plus BaseMapper 自动处理 -->
+
+    <!-- 查询所有执勤人员 -->
+    <select id="selectAll" resultMap="ResponderResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM responders
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据状态查询执勤人员 -->
+    <select id="selectByStatus" parameterType="java.lang.Integer" resultMap="ResponderResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM responders
+        WHERE status = #{status}
+        ORDER BY name
+    </select>
+
+    <!-- 根据岗位查询执勤人员 -->
+    <select id="selectByPosition" parameterType="java.lang.String" resultMap="ResponderResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM responders
+        WHERE position = #{position}
+        ORDER BY name
+    </select>
+
+    <!-- 根据用户ID查询执勤人员 -->
+    <select id="selectByUserId" parameterType="java.lang.Long" resultMap="ResponderResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM responders
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- insert 和 updateById 由 MyBatis-Plus BaseMapper 自动处理，避免参数绑定冲突 -->
+
+    <!-- 删除执勤人员 -->
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM responders WHERE id = #{id}
+    </delete>
+
+    <!-- 批量删除执勤人员 -->
+    <delete id="deleteBatch" parameterType="java.util.List">
+        DELETE FROM responders WHERE id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 更新执勤人员位置 -->
+    <update id="updateLocation">
+        UPDATE responders
+        SET lat = #{lat}, lng = #{lng}, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 更新执勤人员状态 -->
+    <update id="updateStatus">
+        UPDATE responders
+        SET status = #{status}, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 统计执勤人员总数 -->
+    <select id="countAll" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM responders
+    </select>
+
+    <!-- 按岗位统计人员数量 -->
+    <select id="countByPosition" resultType="java.util.Map">
+        SELECT position, COUNT(*) as count
+        FROM responders
+        GROUP BY position
+    </select>
+
+    <!-- 查询附近执勤人员 -->
+    <select id="selectNearby" resultMap="ResponderResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM responders
+        WHERE status = 1
+        AND (
+        6371 * acos(
+        cos(radians(#{lat})) * cos(radians(lat)) * cos(radians(lng) - radians(#{lng})) +
+        sin(radians(#{lat})) * sin(radians(lat))
+        )
+        ) &lt;= #{radius}
+        ORDER BY (
+        6371 * acos(
+        cos(radians(#{lat})) * cos(radians(lat)) * cos(radians(lng) - radians(#{lng})) +
+        sin(radians(#{lat})) * sin(radians(lat))
+        )
+        ) ASC
+    </select>
+
+</mapper>

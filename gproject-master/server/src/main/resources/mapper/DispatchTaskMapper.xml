@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hrd.mapper.DispatchTaskMapper">
+
+    <!-- 派单任务结果映射 -->
+    <resultMap id="DispatchTaskResultMap" type="com.hrd.entity.DispatchTask">
+        <id column="id" property="id"/>
+        <result column="incident_id" property="incidentId"/>
+        <result column="responder_id" property="responderId"/>
+        <result column="description" property="description"/>
+        <result column="location" property="location"/>
+        <result column="deadline" property="deadline"/>
+        <result column="notes" property="notes"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="depart_time" property="departTime"/>
+        <result column="arrive_time" property="arriveTime"/>
+        <result column="complete_time" property="completeTime"/>
+        <result column="feedback" property="feedback"/>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, incident_id, responder_id, description, location, deadline, notes, status,
+        create_time, depart_time, arrive_time, complete_time, feedback
+    </sql>
+
+    <!-- 根据ID查询派单任务 -->
+    <select id="selectById" parameterType="java.lang.Long" resultMap="DispatchTaskResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM dispatch_tasks
+        WHERE id = #{id}
+    </select>
+
+    <!-- 查询所有派单任务 -->
+    <select id="selectAll" resultMap="DispatchTaskResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM dispatch_tasks
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据状态查询派单任务 -->
+    <select id="selectByStatus" parameterType="java.lang.Integer" resultMap="DispatchTaskResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM dispatch_tasks
+        WHERE status = #{status}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 插入派单任务 -->
+    <insert id="insert" parameterType="com.hrd.entity.DispatchTask" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dispatch_tasks (
+            incident_id, responder_id, description, location, deadline, notes, status,
+            create_time, depart_time, arrive_time, complete_time, feedback
+        ) VALUES (
+                     #{incidentId}, #{responderId}, #{description}, #{location}, #{deadline}, #{notes}, #{status},
+                     #{createTime}, #{departTime}, #{arriveTime}, #{completeTime}, #{feedback}
+                 )
+    </insert>
+
+    <!-- updateById 由 MyBatis-Plus BaseMapper 自动提供，不需要自定义 -->
+
+    <!-- 删除派单任务 -->
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM dispatch_tasks WHERE id = #{id}
+    </delete>
+
+    <!-- 批量删除派单任务 -->
+    <delete id="deleteBatch" parameterType="java.util.List">
+        DELETE FROM dispatch_tasks WHERE id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 根据事件ID删除任务 -->
+    <delete id="deleteByIncidentId" parameterType="java.lang.Long">
+        DELETE FROM dispatch_tasks WHERE incident_id = #{incidentId}
+    </delete>
+
+    <!-- 更新任务状态 -->
+    <update id="updateStatus">
+        UPDATE dispatch_tasks
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 记录出发时间 -->
+    <update id="recordDepartTime">
+        UPDATE dispatch_tasks
+        SET status = 1, depart_time = #{departTime}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 记录到达时间 -->
+    <update id="recordArriveTime">
+        UPDATE dispatch_tasks
+        SET status = 2, arrive_time = #{arriveTime}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 记录完成时间 -->
+    <update id="recordCompleteTime">
+        UPDATE dispatch_tasks
+        SET status = 4, complete_time = #{completeTime}, feedback = #{feedback}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 统计派单任务总数 -->
+    <select id="countAll" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM dispatch_tasks
+    </select>
+
+    <!-- 按状态统计任务数量 -->
+    <select id="countByStatus" resultType="java.util.Map">
+        SELECT status, COUNT(*) as count
+        FROM dispatch_tasks
+        GROUP BY status
+    </select>
+
+    <!-- 查询超时未完成的任务 -->
+    <select id="selectOverdue" resultMap="DispatchTaskResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM dispatch_tasks
+        WHERE status &lt; 4 AND deadline &lt; NOW()
+        ORDER BY deadline ASC
+    </select>
+
+    <!-- 条件查询任务 -->
+    <select id="selectByCondition" resultMap="DispatchTaskResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM dispatch_tasks
+        <where>
+            <if test="incidentId != null">AND incident_id = #{incidentId}</if>
+            <if test="responderId != null">AND responder_id = #{responderId}</if>
+            <if test="status != null">AND status = #{status}</if>
+            <if test="startTime != null">AND create_time >= #{startTime}</if>
+            <if test="endTime != null">AND create_time &lt;= #{endTime}</if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>
